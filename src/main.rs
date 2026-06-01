@@ -14,15 +14,18 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Csv {
-        #[arg(default_value = "output.csv")]
+        #[arg(short, long, default_value = "output.csv")]
         path: String,
 
         #[arg(short, long, default_value_t = 10)]
         lines: u32,
+
+        #[arg(short, long, default_value = ",")]
+        delim: String,
     },
 
     Xml {
-        #[arg(default_value = "output.xml")]
+        #[arg(short, long, default_value = "output.xml")]
         path: String,
 
         #[arg(short, long, default_value_t = 10)]
@@ -38,15 +41,13 @@ fn open_file(path: &str) -> Result<File, io::Error> {
         .open(path)
 }
 
-fn write_csv(path: &str, lines: u32) -> Result<(), io::Error> {
+fn write_csv(path: &str, lines: u32, delim: String) -> Result<(), io::Error> {
     let mut file = open_file(&path)?;
 
-    let delim = ",";
-
-    // Write Headers
+    // Headers
     write!(file, "index{delim}data\n")?;
 
-    // Write Data
+    // Data
     for i in 1..=lines {
         write!(file, "{i}{delim}data\n")?;
     }
@@ -58,7 +59,7 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Csv { path, lines } => match write_csv(&path, lines) {
+        Commands::Csv { path, lines, delim } => match write_csv(&path, lines, delim) {
             Ok(_file) => println!("Opened successfully"),
             Err(e) => println!("Failed: {e}"),
         },
