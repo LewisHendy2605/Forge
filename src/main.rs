@@ -27,6 +27,14 @@ enum Commands {
 
         #[arg(short, long, default_value = ",")]
         delim: String,
+
+        #[arg(
+            short,
+            long,
+            default_value = "id:uuid,name:first_name,email:email",
+            value_delimiter = ','
+        )]
+        columns: Vec<String>,
     },
 
     Xml {
@@ -46,8 +54,21 @@ fn open_file(path: &str) -> Result<File, io::Error> {
         .open(path)
 }
 
-fn write_csv(path: &str, lines: u32, delim: String) -> Result<(), io::Error> {
+fn write_csv(path: &str, lines: u32, delim: String, columns: Vec<String>) -> Result<(), io::Error> {
     let mut file = open_file(&path)?;
+    // let mut headers: Vec<String> = Vec::new();
+
+    // println!("{:?}", columns);
+
+    /*
+    for col in columns {
+        let (col_name, col_type) = col.split_once(":").unwrap_or((&col, "string"));
+
+        headers.push(col_name.to_string())
+    }
+    */
+
+    // let mut headers: Vec<String> = Vec::new();
 
     // Headers
     write!(file, "index{delim}id{delim}name{delim}email{delim}city\n")?;
@@ -72,7 +93,12 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Csv { path, lines, delim } => match write_csv(&path, lines, delim) {
+        Commands::Csv {
+            path,
+            lines,
+            delim,
+            columns,
+        } => match write_csv(&path, lines, delim, columns) {
             Ok(_file) => println!("Opened successfully"),
             Err(e) => println!("Failed: {e}"),
         },
