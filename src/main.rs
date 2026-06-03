@@ -31,7 +31,7 @@ enum Commands {
         #[arg(
             short,
             long,
-            default_value = "id:uuid,name:first_name,email:email",
+            default_value = "index:index, id:uuid, name:full_name, email:email",
             value_delimiter = ','
         )]
         columns: Vec<String>,
@@ -56,35 +56,41 @@ fn open_file(path: &str) -> Result<File, io::Error> {
 
 fn write_csv(path: &str, lines: u32, delim: String, columns: Vec<String>) -> Result<(), io::Error> {
     let mut file = open_file(&path)?;
-    // let mut headers: Vec<String> = Vec::new();
+    let mut headers: Vec<String> = Vec::new();
+    let mut types: Vec<String> = Vec::new();
 
-    // println!("{:?}", columns);
-
-    /*
+    // Parse schema
     for col in columns {
         let (col_name, col_type) = col.split_once(":").unwrap_or((&col, "string"));
 
-        headers.push(col_name.to_string())
+        headers.push(col_name.to_string());
+        types.push(col_type.to_string());
     }
-    */
-
-    // let mut headers: Vec<String> = Vec::new();
-
-    // Headers
-    write!(file, "index{delim}id{delim}name{delim}email{delim}city\n")?;
 
     // Data
+    let mut rows: Vec<String> = Vec::new();
     for i in 1..=lines {
-        let name: String = Name().fake();
-        let email: String = FreeEmail().fake();
-        let city: String = CityName().fake();
-        let id: String = UUIDv4.fake();
+        // Build row
+        let mut row: Vec<String> = Vec::new();
+        for t in &types {
+            let col = match t.as_str() {
+                "index" => i.to_string(),
+                "uuid" => UUIDv4.fake(),
+                "email" => FreeEmail().fake(),
+                "city" => CityName().fake(),
+                "full_name" => Name().fake(),
+                _ => String::new(),
+            };
 
-        write!(
-            file,
-            "{i}{delim}{id}{delim}{name}{delim}{email}{delim}{city}\n"
-        )?;
+            row.push(col)
+        }
+
+        // Add to rows
+        rows.push(row.join(&delim))
     }
+
+    write!(file, "{}\n", headers.join(&delim))?;
+    write!(file, "{}", rows.join("\n"))?;
 
     Ok(())
 }
