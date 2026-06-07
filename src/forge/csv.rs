@@ -1,12 +1,20 @@
 use std::io;
 
+use super::counting_writer::CountingWriter;
+use super::error::ForgeError;
 use super::generator::generate_data;
-use super::utils::open_file;
+use super::utils;
 
 // Generates and writes csv file from input params
-pub fn write(path: &str, lines: u32, delim: u8, columns: Vec<String>) -> Result<(), io::Error> {
-    let file = open_file(&path)?;
-    let mut writer = csv::WriterBuilder::new().delimiter(delim).from_writer(file);
+pub fn write(path: &str, records: u32, delim: u8, columns: Vec<String>) -> Result<(), ForgeError> {
+    let file = utils::open_file(&path)?;
+    let counting = CountingWriter {
+        inner: file,
+        bytes: 0,
+    };
+    let mut writer = csv::WriterBuilder::new()
+        .delimiter(delim)
+        .from_writer(counting);
 
     let mut headers: Vec<String> = Vec::new();
     let mut types: Vec<String> = Vec::new();
@@ -22,7 +30,7 @@ pub fn write(path: &str, lines: u32, delim: u8, columns: Vec<String>) -> Result<
     writer.write_record(headers)?;
 
     // Data
-    for i in 1..=lines {
+    for i in 1..=records {
         // Build row
         let mut row: Vec<String> = Vec::new();
         for t in &types {
@@ -31,6 +39,16 @@ pub fn write(path: &str, lines: u32, delim: u8, columns: Vec<String>) -> Result<
 
         writer.write_record(row)?;
     }
+
+    writer.flush()?;
+
+    let inner = writer
+        .into_inner()
+        .map_err(|e| ForgeError::Io(io::Error::new(io::ErrorKind::Other, e.to_string())))?;
+    let bytes = inner.bytes;
+
+    println!("Written: {}", utils::format_bytes(bytes));
+    println!("File: {}", path);
 
     Ok(())
 }

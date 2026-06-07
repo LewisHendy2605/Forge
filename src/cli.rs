@@ -27,7 +27,7 @@ pub enum Commands {
         path: String,
 
         #[arg(short, long, default_value_t = 10)]
-        lines: u32,
+        records: u32,
 
         #[arg(short, long, default_value = ",", value_parser = parse_delim)]
         delim: u8,

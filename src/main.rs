@@ -6,16 +6,16 @@ use clap::Parser;
 // Parse cli params and call associated commands
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = cli::Cli::parse();
+    let start = std::time::Instant::now();
 
     match cli.command {
         cli::Commands::Csv {
             path,
-            lines,
+            records,
             delim,
             columns,
         } => {
-            forge::csv::write(&path, lines, delim, columns)?;
-            println!("CSV File generated");
+            forge::csv::write(&path, records, delim, columns)?;
         }
         cli::Commands::Xml {
             path,
@@ -23,8 +23,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             columns,
         } => {
             forge::xml::write(&path, records, columns)?;
-            println!("XML File generated");
         }
     }
+
+    println!("Time Elapsed: {:.2?}", start.elapsed());
     Ok(())
 }

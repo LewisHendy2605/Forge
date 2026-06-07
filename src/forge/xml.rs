@@ -1,14 +1,19 @@
 use xml::writer::{EmitterConfig, XmlEvent};
 
+use super::counting_writer::CountingWriter;
 use super::error::ForgeError;
 use super::generator::generate_data;
-use super::utils::open_file;
+use super::utils;
 
 pub fn write(path: &str, records: u32, columns: Vec<String>) -> Result<(), ForgeError> {
-    let file = open_file(&path)?;
+    let file = utils::open_file(&path)?;
+    let counting = CountingWriter {
+        inner: file,
+        bytes: 0,
+    };
     let mut writer = EmitterConfig::new()
         .perform_indent(true)
-        .create_writer(file);
+        .create_writer(counting);
 
     let mut headers: Vec<(String, String)> = Vec::new();
 
@@ -35,6 +40,11 @@ pub fn write(path: &str, records: u32, columns: Vec<String>) -> Result<(), Forge
     }
 
     writer.write(XmlEvent::end_element())?;
+
+    let bytes = writer.into_inner().bytes;
+
+    println!("Written: {}", utils::format_bytes(bytes));
+    println!("File: {}", path);
 
     Ok(())
 }
