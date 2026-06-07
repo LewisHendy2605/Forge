@@ -1,5 +1,5 @@
 mod cli;
-mod commands;
+mod forge;
 
 use clap::Parser;
 
@@ -14,10 +14,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             delim,
             columns,
         } => {
-            commands::csv::write_csv(&path, lines, delim, columns)?;
+            forge::csv::write(&path, lines, delim, columns)?;
             println!("CSV File generated");
         }
-        cli::Commands::Xml { path: _ } => {
+        cli::Commands::Xml {
+            path,
+            records,
+            columns,
+        } => {
+            forge::xml::write(&path, records, columns)?;
             println!("XML File generated");
         }
     }

@@ -44,5 +44,16 @@ pub enum Commands {
     Xml {
         #[arg(short, long, default_value = "output.xml")]
         path: String,
+
+        #[arg(short, long, default_value_t = 10)]
+        records: u32,
+
+        #[arg(
+            short,
+            long,
+            default_value = "index:index, id:uuid, title:title, first_name:first_name, last_name:last_name, email:email, post_code:post_code, street_name:street_name, building_number:building_number, file_path:file_path, quoted:quoted",
+            value_delimiter = ','
+        )]
+        columns: Vec<String>,
     },
 }
