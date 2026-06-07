@@ -3,7 +3,7 @@ mod commands;
 
 use clap::Parser;
 
-// Parse cli params and call associated commads
+// Parse cli params and call associated commands
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = cli::Cli::parse();
 
