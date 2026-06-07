@@ -7,5 +7,8 @@ Data file generation cli tool
 
 ## Usage
 ```
-forge.exe csv --path C:\documents\file.csv --lines 100 --columns "index:index, id:uuid, name:full_name, email:email""
+forge.exe csv --path C:\documents\file.csv --records 100 --delim "," --columns "index:index, id:uuid, name:full_name, email:email""
+```
+```
+forge.exe xml --path C:\documents\file.csv --records 100 --columns "index:index, id:uuid, name:full_name, email:email""
 ```
