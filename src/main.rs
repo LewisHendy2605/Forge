@@ -31,6 +31,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } => {
             forge::xml::write(&path, records, columns)?;
         }
+        cli::Commands::Json {
+            path,
+            records,
+            columns,
+        } => {
+            forge::json::write(&path, records, columns)?;
+        }
     }
 
     println!("Time Elapsed: {:.2?}", start.elapsed());
