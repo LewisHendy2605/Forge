@@ -1,19 +1,37 @@
 use super::error::ForgeError;
+use genpdf::fonts;
+
+#[derive(rust_embed::RustEmbed)]
+#[folder = "assets\\fonts\\LiberationSans"]
+struct Fonts;
 
 pub fn write(path: &str, records: u32) -> Result<(), ForgeError> {
-    // Load a font from the file system
-    let font_family = genpdf::fonts::from_files(
-        "C:\\Users\\lewis\\Documents\\fonts\\LiberationSans",
-        "LiberationSans",
-        None,
-    )
-    .expect("Failed to load font family");
+    let regular_bytes = Fonts::get("LiberationSans-Regular.ttf").unwrap();
+    let bold_bytes = Fonts::get("LiberationSans-Bold.ttf").unwrap();
+    let italic_bytes = Fonts::get("LiberationSans-Italic.ttf").unwrap();
+    let bold_italic_bytes = Fonts::get("LiberationSans-BoldItalic.ttf").unwrap();
+
+    let regular = genpdf::fonts::FontData::new(regular_bytes.data.to_vec(), None)
+        .expect("Failed to load font");
+    let bold =
+        genpdf::fonts::FontData::new(bold_bytes.data.to_vec(), None).expect("Failed to load font");
+    let italic = genpdf::fonts::FontData::new(italic_bytes.data.to_vec(), None)
+        .expect("Failed to load font");
+    let bold_italic = genpdf::fonts::FontData::new(bold_italic_bytes.data.to_vec(), None)
+        .expect("Failed to load font");
+
+    let font_family = fonts::FontFamily {
+        regular,
+        bold,
+        italic,
+        bold_italic,
+    };
 
     // Create a document and set the default font family
     let mut doc = genpdf::Document::new(font_family);
 
     // Change the default settings
-    doc.set_title("Demo document");
+    doc.set_title("Output Pdf");
 
     // Customize the pages
     let mut decorator = genpdf::SimplePageDecorator::new();
